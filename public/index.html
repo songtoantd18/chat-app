@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+
+<body>
+    <h1>Chat App</h1>
+    <p>Giá trị đếm hiện tại: <span id="count">0</span></p>
+    <button id="increment">+1</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        const socket = io(); // Kết nối với server
+
+        // Lắng nghe sự kiện 'countupdate' từ server để cập nhật giao diện
+        socket.on("countupdate", (count) => {
+            console.log("Bước 5: Nhận sự kiện countupdate từ server:", count); // Log giá trị count nhận từ server
+            document.getElementById("count").textContent = count; // Hiển thị số đếm mới trên giao diện
+        });
+
+        // Lấy phần tử nút và thêm sự kiện 'click'
+        document.getElementById("increment").addEventListener("click", () => {
+            console.log("Bước 6: Nút +1 được nhấn"); // Log khi nút được nhấn
+            // Gửi sự kiện 'increment' đến server khi nút được nhấn
+            socket.emit("increment");
+        });
+
+    </script>
+</body>
+
+</html>
