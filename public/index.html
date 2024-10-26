@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <h1>Chat App1</h1>
+    <h1>Chat App</h1>
     <p>Giá trị đếm hiện tại: <span id="count">0</span></p>
     <button id="increment">+1</button>
 
@@ -17,15 +17,22 @@
 
         const socket = io(); // Kết nối với server
 
+        // Hàm để lấy thời gian hiện tại
+        function getCurrentTime() {
+            const now = new Date();
+            console.log("🚀 ~ getCurrentTime ~ now:", now)
+            return now.toLocaleString(); // Định dạng thời gian theo ngôn ngữ địa phương
+        }
+
         // Lắng nghe sự kiện 'countupdate' từ server để cập nhật giao diện
         socket.on("countupdate", (count) => {
-            console.log("Bước 5: Nhận sự kiện countupdate từ server:", count); // Log giá trị count nhận từ server
+            console.log("[" + getCurrentTime() + "] Bước 5: Nhận sự kiện countupdate từ server:", count); // Log giá trị count nhận từ server với thời gian
             document.getElementById("count").textContent = count; // Hiển thị số đếm mới trên giao diện
         });
 
         // Lấy phần tử nút và thêm sự kiện 'click'
         document.getElementById("increment").addEventListener("click", () => {
-            console.log("Bước 6: Nút +1 được nhấn"); // Log khi nút được nhấn
+            console.log("[" + getCurrentTime() + "] Bước 6: Nút +1 được nhấn"); // Log khi nút được nhấn với thời gian
             // Gửi sự kiện 'increment' đến server khi nút được nhấn
             socket.emit("increment");
         });
