@@ -23,5 +23,8 @@ B1. coi hết video tóm tắt lại ý chính
 170. tạo thông báo theo dõi để khi người khác vào phòng hay thoát ra thì đều có thoogn báo, không cho cùng tên mà vào cùng phòng
 171. hiển thị tên giờ nội dung tin nhắn ở dưới
 172. tạo tên room hiển thị tên room và giao diện sidebar tempalte
-173. tạo auto scroll khi tin nhắn quá dài
+173. tạo auto scroll khi tin nhắn quá dài search từ khóa beforeend,xây dựng giao diện hoàn chỉnh, scrollbottom để luôn ở dưới nhận tin nhắn mới nhất
+
+174. sử dụng heroku coi lại video 135 có hướng dẫn sử dụng heroku chi tiết
+
      B2. vào làm note lại có gì thay đổi thì ghi vào đây
