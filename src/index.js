@@ -1,41 +1,39 @@
+// server.js
 const path = require("path");
 const http = require("http");
 const express = require("express");
 const socketIo = require("socket.io");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
-
 const port = process.env.PORT || 3000;
 
-// Đường dẫn tĩnh đến thư mục 'public'
 const publicDirectoryPath = path.join(__dirname, "../public");
 app.use(express.static(publicDirectoryPath));
 
-// Biến đếm ban đầu
+/// server.js
 let count = 0;
 
-// Kết nối socket
+// server.js
 io.on("connection", (socket) => {
-  console.log("Bước 1: Một người dùng đã kết nối"); // Log khi một client kết nối
+  console.log("Client connected");
 
-  // Gửi giá trị đếm hiện tại khi user kết nối
-  socket.emit("countupdate", count);
-  console.log(`Bước 2: Gửi giá trị đếm ban đầu: ${count}`); // Log giá trị đếm hiện tại
+  // Lắng nghe sự kiện "join" từ client và gửi thông báo đến tất cả các client khác
+  socket.on("join", (data) => {
+    console.log(`New user joined from ${data.location} at ${data.time}`);
+    socket.broadcast.emit(
+      "message",
+      `A new user has joined the chat from ${data.location} at ${data.time}`
+    );
+  });
 
-  // Lắng nghe sự kiện 'increment' từ client
-  socket.on("increment", () => {
-    count++; // Tăng giá trị đếm
-    console.log(`Bước 3: Nhận sự kiện increment, giá trị đếm mới: ${count}`); // Log khi nhận sự kiện increment
-    // Phát sự kiện 'countupdate' với giá trị mới đến tất cả các client
-    io.emit("countupdate", count);
-    console.log(
-      `Bước 4: Phát lại giá trị đếm mới cho tất cả các client: ${count}`
-    ); // Log khi phát giá trị mới
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+    socket.broadcast.emit("message", "A user has left the chat");
   });
 });
 
-// Lắng nghe server trên port 3000
 server.listen(port, () => {
-  console.log(`Server đang chạy trên cổng ${port}`); // Log khi server bắt đầu lắng nghe
+  console.log(`Server is running on port ${port}`);
 });

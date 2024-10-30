@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,34 +10,49 @@
 
 <body>
     <h1>Chat App</h1>
-    <p>Giá trị đếm hiện tại: <span id="count">0</span></p>
-    <button id="increment">+1</button>
+    <div id="messages"></div>
+    <p>Current count: <span id="count">0</span></p>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        const socket = io();
 
-        const socket = io(); // Kết nối với server
+        // Lấy địa chỉ và thời gian của client
+        let clientLocation = "";
+        let clientTime = "";
 
-        // Hàm để lấy thời gian hiện tại
-        function getCurrentTime() {
-            const now = new Date();
-            console.log("🚀 ~ getCurrentTime ~ now:", now)
-            return now.toLocaleString(); // Định dạng thời gian theo ngôn ngữ địa phương
+        // Lấy địa chỉ của client sử dụng Geolocation API
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    clientLocation = `Lat: ${latitude.toFixed(2)}, Long: ${longitude.toFixed(2)}`;
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    clientLocation = "Location unavailable";
+                }
+            );
+        } else {
+            clientLocation = "Geolocation not supported";
         }
 
-        // Lắng nghe sự kiện 'countupdate' từ server để cập nhật giao diện
-        socket.on("countupdate", (count) => {
-            console.log("[" + getCurrentTime() + "] Bước 5: Nhận sự kiện countupdate từ server:", count); // Log giá trị count nhận từ server với thời gian
-            document.getElementById("count").textContent = count; // Hiển thị số đếm mới trên giao diện
+        // Lấy thời gian hiện tại của client
+        const now = new Date();
+        clientTime = now.toLocaleString();
+
+        // Lắng nghe sự kiện "message" từ server và hiển thị thông báo trên giao diện
+        socket.on("message", (message) => {
+            const messageElement = document.createElement("div");
+            messageElement.textContent = message;
+            document.getElementById("messages").appendChild(messageElement);
         });
 
-        // Lấy phần tử nút và thêm sự kiện 'click'
-        document.getElementById("increment").addEventListener("click", () => {
-            console.log("[" + getCurrentTime() + "] Bước 6: Nút +1 được nhấn"); // Log khi nút được nhấn với thời gian
-            // Gửi sự kiện 'increment' đến server khi nút được nhấn
-            socket.emit("increment");
+        // Khi client kết nối, gửi thông tin địa chỉ và thời gian đến server
+        socket.on("connect", () => {
+            socket.emit("join", { location: clientLocation, time: clientTime });
         });
-
     </script>
 </body>
 
