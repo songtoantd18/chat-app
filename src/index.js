@@ -1,4 +1,3 @@
-// server.js
 const path = require("path");
 const http = require("http");
 const express = require("express");
@@ -9,31 +8,50 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
-const publicDirectoryPath = path.join(__dirname, "../public");
-app.use(express.static(publicDirectoryPath));
+// Cung cấp thư mục public
+app.use(express.static(path.join(__dirname, "../public")));
 
-/// server.js
-let count = 0;
+// Lưu trữ thông tin người dùng và phòng
+const users = {};
 
-// server.js
 io.on("connection", (socket) => {
   console.log("Client connected");
 
-  // Lắng nghe sự kiện "join" từ client và gửi thông báo đến tất cả các client khác
-  socket.on("join", (data) => {
-    console.log(`New user joined from ${data.location} at ${data.time}`);
-    socket.broadcast.emit(
-      "message",
-      `A new user has joined the chat from ${data.location} at ${data.time}`
-    );
+  // Khi người dùng tham gia phòng
+  socket.on("joinRoom", ({ username, room }) => {
+    socket.join(room);
+    users[socket.id] = { username, room };
+
+    socket.emit("message", {
+      username: "Admin",
+      message: `Chào mừng ${username} đến với ${room}!`,
+    });
+
+    socket.broadcast.to(room).emit("message", {
+      username: "Admin",
+      message: `${username} đã tham gia!`,
+    });
   });
 
+  // Khi người dùng gửi tin nhắn
+  socket.on("chatMessage", ({ username, room, message }) => {
+    io.to(room).emit("message", { username, message });
+  });
+
+  // Khi người dùng ngắt kết nối
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
-    socket.broadcast.emit("message", "A user has left the chat");
+    const user = users[socket.id];
+    if (user) {
+      socket.broadcast.to(user.room).emit("message", {
+        username: "Admin",
+        message: `${user.username} đã rời khỏi phòng!`,
+      });
+      delete users[socket.id];
+    }
   });
 });
 
+// Khởi động server
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
